@@ -1,0 +1,456 @@
+# OpenVPN server configuration '{{ name }}'
+# Managed by Salt
+# Template: {{ source }}
+
+#################################################
+# Sample OpenVPN 2.0 config file for            #
+# multi-client server.                          #
+#                                               #
+# This file is for the server side              #
+# of a many-clients <-> one-server              #
+# OpenVPN configuration.                        #
+#                                               #
+# OpenVPN also supports                         #
+# single-machine <-> single-machine             #
+# configurations (See the Examples page         #
+# on the web site for more info).               #
+#                                               #
+# This config should work on Windows            #
+# or Linux/BSD systems.  Remember on            #
+# Windows to quote pathnames and use            #
+# double backslashes, e.g.:                     #
+# "/etc/openvpn/foo.key" 			#
+#                                               #
+# Comments are preceded with '#' or ';'         #
+#################################################
+
+# Which local IP address should OpenVPN
+# listen on? (optional)
+{%- if config.local is defined %}
+local {{ config.local }}
+{%- endif %}
+
+{%- if config.auth is defined %}
+auth {{ config.auth }}
+{%- endif %}
+
+# Which TCP/UDP port should OpenVPN listen on?
+# If you want to run multiple OpenVPN instances
+# on the same machine, use a different port
+# number for each one.  You will need to
+# open up this port on your firewall.
+{%- if config.port is defined %}
+port {{ config.port }}
+{%- else %}
+port 1194
+{%- endif %}
+
+{%- if config.port_share is defined %}
+port-share {{ config.port_share }}
+{%- endif %}
+
+{%- if config.daemon is defined and config.daemon == True %}
+daemon
+{%- endif %}
+
+# TCP or UDP server?
+{%- if config.proto is defined %}
+proto {{ config.proto }}
+{%- else %}
+proto udp
+{%- endif %}
+
+{%- if config.topology is defined %}
+topology {{ config.topology }}
+{%- endif %}
+
+# "dev tun" will create a routed IP tunnel,
+# "dev tap" will create an ethernet tunnel.
+# Use "dev tap0" if you are ethernet bridging
+# and have precreated a tap0 virtual interface
+# and bridged it with your ethernet interface.
+# If you want to control access policies
+# over the VPN, you must create firewall
+# rules for the the TUN/TAP interface.
+# On non-Windows systems, you can give
+# an explicit unit number, such as tun0.
+# On Windows, use "dev-node" for this.
+# On most systems, the VPN will not function
+# unless you partially or fully disable
+# the firewall for the TUN/TAP interface.
+{%- if config.dev is defined %}
+dev {{ config.dev }}
+{%- else %}
+dev tun
+{%- endif %}
+{%- if config.tun_ipv6 is defined and config.tun_ipv6 == True%}
+tun-ipv6
+{%- endif %}
+
+# Windows needs the TAP-Win32 adapter name
+# from the Network Connections panel if you
+# have more than one.  On XP SP2 or higher,
+# you may need to selectively disable the
+# Windows firewall for the TAP adapter.
+# Non-Windows systems usually don't need this.
+{%- if config.dev_node is defined %}
+dev-node {{ config.dev_node }}
+{%- endif %}
+
+# SSL/TLS root certificate (ca), certificate
+# (cert), and private key (key).  Each client
+# and the server must have their own cert and
+# key file.  The server and all clients will
+# use the same ca file.
+#
+# See the "easy-rsa" directory for a series
+# of scripts for generating RSA certificates
+# and private keys.  Remember to use
+# a unique Common Name for the server
+# and each of the client certificates.
+#
+# Any X509 key management system can be used.
+# OpenVPN can also use a PKCS #12 formatted key file
+# (see "pkcs12" directive in man page).
+{%- if config.ca is defined %}
+ca {{ config.ca }}
+{%- else %}
+# ca is not set !
+{%- endif %}
+
+{%- if config.cert is defined %}
+cert {{ config.cert }}
+{%- else %}
+# cert is not set !
+{%- endif %}
+
+{%- if config.key is defined %}
+key {{ config.key }}
+{%- else %}
+# key is not set !
+{%- endif %}
+
+# Diffie hellman parameters.
+# Generate your own with:
+#   openssl dhparam -out dh1024.pem 1024
+# Substitute 2048 for 1024 if you are using
+# 2048 bit keys. 
+{%- if config.dh is defined %}
+dh {{ config.dh }}
+{%- else %}
+dh dh1024.pem
+{%- endif %}
+
+# Configure server mode and supply a VPN subnet
+# for OpenVPN to draw client addresses from.
+# The server will take 10.8.0.1 for itself,
+# the rest will be made available to clients.
+# Each client will be able to reach the server
+# on 10.8.0.1. Comment this line out if you are
+# ethernet bridging. See the man page for more info.
+{%- if config.server is defined %}
+server {{ config.server }}
+{%- endif %}
+{%- if config.server_ipv6 is defined %}
+server-ipv6 {{ config.server_ipv6 }}
+{%- endif %}
+
+{%- if config.ifconfig_pool is defined %}
+ifconfig-pool {{ config.ifconfig_pool }}
+{%- endif %}
+
+# Maintain a record of client <-> virtual IP address
+# associations in this file.  If OpenVPN goes down or
+# is restarted, reconnecting clients can be assigned
+# the same virtual IP address from the pool that was
+# previously assigned.
+{%- if config.ifconfig_pool_persist is defined %}
+ifconfig-pool-persist {{ config.ifconfig_pool_persist }}
+{%- endif %}
+
+# Configure server mode for ethernet bridging.
+# You must first use your OS's bridging capability
+# to bridge the TAP interface with the ethernet
+# NIC interface.  Then you must manually set the
+# IP/netmask on the bridge interface, here we
+# assume 10.8.0.4/255.255.255.0.  Finally we
+# must set aside an IP range in this subnet
+# (start=10.8.0.50 end=10.8.0.100) to allocate
+# to connecting clients.  Leave this line commented
+# out unless you are ethernet bridging.
+{%- if config.server_bridge is defined %}
+server-bridge {{ config.server_bridge }}
+{%- endif %}
+
+# Push routes to the client to allow it
+# to reach other private subnets behind
+# the server.  Remember that these
+# private subnets will also need
+# to know to route the OpenVPN client
+# address pool (10.8.0.0/255.255.255.0)
+# back to the OpenVPN server.
+
+# If enabled, this directive will configure
+# all clients to redirect their default
+# network gateway through the VPN, causing
+# all IP traffic such as web browsing and
+# and DNS lookups to go through the VPN
+# (The OpenVPN server machine may need to NAT
+# or bridge the TUN/TAP interface to the internet
+# in order for this to work properly).
+
+#In UDP client mode or point-to-point mode, 
+#send server/peer an exit notification if tunnel 
+#is restarted or OpenVPN process is exited
+#The n parameter (default=1) controls the maximum number of retries 
+#that the client will attempt to resend the exit notification message
+{%- if config.push is defined %}
+{%- for push in config.push %}
+push "{{ push }}"
+{%- endfor %}
+{%- endif %}
+
+{%- if config.route is defined %}
+{%- for route in config.route %}
+route {{ route }}
+{%- endfor %}
+{%- endif %}
+
+# To assign specific IP addresses to specific
+# clients or if a connecting client has a private
+# subnet behind it that should also have VPN access,
+# use the subdirectory "ccd" for client-specific
+# configuration files (see man page for more info).
+
+# EXAMPLE: Suppose the client
+# having the certificate common name "Thelonious"
+# also has a small subnet behind his connecting
+# machine, such as 192.168.40.128/255.255.255.248.
+# First, uncomment out these lines:
+{%- if config.client_config_dir is defined %}
+client-config-dir {{ config.client_config_dir }}
+{%- endif %}
+# Then create a file ccd/Thelonious with this line:
+#   iroute 192.168.40.128 255.255.255.248
+# This will allow Thelonious' private subnet to
+# access the VPN.  This example will only work
+# if you are routing, not bridging, i.e. you are
+# using "dev tun" and "server" directives.
+
+# EXAMPLE: Suppose you want to give
+# Thelonious a fixed VPN IP address of 10.9.0.1.
+# First uncomment out these lines:
+;client-config-dir ccd
+;route 10.9.0.0 255.255.255.252
+# Then add this line to ccd/Thelonious:
+#   ifconfig-push 10.9.0.1 10.9.0.2
+
+# Suppose that you want to enable different
+# firewall access policies for different groups
+# of clients.  There are two methods:
+# (1) Run multiple OpenVPN daemons, one for each
+#     group, and firewall the TUN/TAP interface
+#     for each group/daemon appropriately.
+# (2) (Advanced) Create a script to dynamically
+#     modify the firewall in response to access
+#     from different clients.  See man
+#     page for more info on learn-address script.
+{%- if config.learn_address is defined %}
+learn-address {{ config.learn_address }}
+{%- endif %}
+
+# Uncomment this directive to allow different
+# clients to be able to "see" each other.
+# By default, clients will only see the server.
+# To force clients to only see the server, you
+# will also need to appropriately firewall the
+# server's TUN/TAP interface.
+{%- if config.client_to_client is defined and config.client_to_client == True %}
+client-to-client
+{%- endif %}
+
+# Uncomment this directive if multiple clients
+# might connect with the same certificate/key
+# files or common names.  This is recommended
+# only for testing purposes.  For production use,
+# each client should have its own certificate/key
+# pair.
+#
+# IF YOU HAVE NOT GENERATED INDIVIDUAL
+# CERTIFICATE/KEY PAIRS FOR EACH CLIENT,
+# EACH HAVING ITS OWN UNIQUE "COMMON NAME",
+# UNCOMMENT THIS LINE OUT.
+{%- if config.duplicate_cn is defined and config.duplicate_cn == True %}
+duplicate-cn
+{%- endif %}
+
+# The keepalive directive causes ping-like
+# messages to be sent back and forth over
+# the link so that each side knows when
+# the other side has gone down.
+# Ping every 10 seconds, assume that remote
+# peer is down if no ping received during
+# a 120 second time period.
+{%- if config.keepalive is defined %}
+keepalive {{ config.keepalive }}
+{%- endif %}
+
+# For extra security beyond that provided
+# by SSL/TLS, create an "HMAC firewall"
+# to help block DoS attacks and UDP port flooding.
+#
+# Generate with:
+#   openvpn --genkey --secret ta.key
+#
+# The server and each client must have
+# a copy of this key.
+# The second parameter should be '0'
+# on the server and '1' on the clients.
+{%- if config.tls_auth is defined %}
+tls-auth {{ config.tls_auth }}
+{%- endif %}
+
+#specify if a client certificate is required, use only in combination 
+#with Username/password instead of certificate based authentication
+# client-cert-not-required
+{%- if config.client_cert_not_required is defined and config.client_cert_not_required == True %}
+client-cert-not-required
+{%- endif %}
+
+{%- if config.username_as_common_name is defined %}
+# Use the username entered as credentials as the common-name. 
+# this common-name is also used for client-profiles
+;;username-as-common-name
+
+# Radius plugin and configuration used to authenticate users based on username and password
+;;plugin /usr/lib/openvpn/radiusplugin.so /etc/openvpn/radiusplugin.cnf
+
+{%- endif %}
+
+{%- if config.verify_x509_name is defined %}
+verify-x509-name {{ config.verify_x509_name }}
+{%- endif %}
+
+# Select a cryptographic cipher.
+# This config item must be copied to
+# the client config file as well.
+{%- if config.ciphers is defined %}
+{%- for cipher in config.ciphers %}
+cipher "{{ cipher }}"
+{%- endfor %}
+{%- endif %}
+
+# Enable compression on the VPN link.
+# If you enable it here, you must also
+# enable it in the client config file.
+{%- if config.comp_lzo is defined and config.comp_lzo == False %}
+;comp-lzo
+{%- else %}
+comp-lzo
+{%- endif %}
+
+# The maximum number of concurrently connected
+# clients we want to allow.
+{%- if config.max_clients is defined %}
+max-clients {{ config.max_clients }}
+{%- endif %}
+
+# It's a good idea to reduce the OpenVPN
+# daemon's privileges after initialization.
+#
+# You can uncomment this out on
+# non-Windows systems.
+{%- if config.user is defined %}
+user {{ config.user }}
+{%- endif %}
+
+{%- if config.group is defined %}
+group {{ config.group }}
+{%- endif %}
+
+# The persist options will try to avoid
+# accessing certain resources on restart
+# that may no longer be accessible because
+# of the privilege downgrade.
+{%- if config.persist_key is defined and config.persist_key == False %}
+;persist-key
+{%- else %}
+persist-key
+{%- endif %}
+
+
+{%- if config.persist_tun is defined and config.persist_tun == False %}
+;persist-tun
+{%- else %}
+persist-tun
+{%- endif %}
+
+# Output a short status file showing
+# current connections, truncated
+# and rewritten every minute.
+{%- if config.status is defined %}
+status {{ config.status }}
+{%- endif %}
+
+# By default, log messages will go to the syslog (or
+# on Windows, if running as a service, they will go to
+# the "\\Program Files\\OpenVPN\\log" directory).
+# Use log or log-append to override this default.
+# "log" will truncate the log file on OpenVPN startup,
+# while "log-append" will append to it.  Use one
+# or the other (but not both).
+{%- if config.log is defined %}
+log {{ config.log }}
+{%- endif %}
+
+{%- if config.log_append is defined %}
+log-append {{ config.log_append }}
+{%- endif %}
+
+# Set the appropriate level of log
+# file verbosity.
+#
+# 0 is silent, except for fatal errors
+# 4 is reasonable for general usage
+# 5 and 6 can help to debug connection problems
+# 9 is extremely verbose
+{%- if config.verb is defined %}
+verb {{ config.verb }}
+{%- else %}
+verb 3
+{%- endif %}
+
+# Silence repeating messages.  At most 20
+# sequential messages of the same message
+# category will be output to the log.
+{%- if config.mute is defined %}
+mute {{ config.mute }}
+{%- endif %}
+
+{%- if config.ccd_exclusive is defined and config.ccd_exclusive == True %}
+ccd-exclusive
+{%- endif %}
+
+{%- if config.username_as_common_name is defined and config.username_as_common_name == True %}
+username-as-common-name
+{%- endif %}
+
+{%- if config.plugins is defined %}
+{%- for plugin in config.plugins %}
+plugin {{ plugin }}
+{%- endfor %}
+{%- endif %}
+
+#Renegotiate data channel key after n seconds
+{%- if config.reneg_sec is defined %}
+reneg-sec {{ config.reneg_sec }}
+{%- endif %}
+
+{%- if config.tun_mtu is defined %}
+tun-mtu {{ config.tun_mtu }}
+{%- endif %}
+
+#revocation list
+{%- if config.crl_verify is defined %}
+crl-verify {{ config.crl_verify }}
+{%- endif %}
