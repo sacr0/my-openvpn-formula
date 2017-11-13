@@ -72,6 +72,8 @@ openvpn_config_{{ type }}_{{ name }}_tls_auth_file:
 #    - makedirs: True
 #    - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
 #    - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
+#    - watch_in:
+#      - service: openvpn_service
 #{% endif %}
 
 {% if config.log is defined %}
@@ -82,6 +84,8 @@ openvpn_{{ type }}_{{ name }}_log_file:
     - makedirs: True
     - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
     - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
+    - watch_in:
+      - service: openvpn_service
 {% endif %}
 
 #{% if config.log_append is defined %}
@@ -92,6 +96,8 @@ openvpn_{{ type }}_{{ name }}_log_file:
 #    - makedirs: True
 #    - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
 #    - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
+#    - watch_in:
+#      - service: openvpn_service
 #{% endif %}
 
 {% if config.client_config_dir is defined %}
@@ -100,6 +106,8 @@ openvpn_config_{{ type }}_{{ name }}_client_config_dir:
   file.directory:
     - name: {{ map.conf_dir }}/{{ config.client_config_dir}}
     - makedirs: True
+    - watch_in:
+      - service: openvpn_service
 
 {% for client, client_config in salt['pillar.get']('openvpn:'+type+':'+name+':client_config', {}).iteritems() %}
 # Client config for {{ client }}
@@ -108,6 +116,8 @@ openvpn_config_{{ type }}_{{ name }}_{{ client }}_client_config:
     - name: {{ map.conf_dir }}/{{ config.client_config_dir}}/{{ client }}
     - contents_pillar: openvpn:{{ type }}:{{ name }}:client_config:{{ client }}
     - makedirs: True
+    - watch_in:
+      - service: openvpn_service
 {% endfor %}
 {% endif %}
 
