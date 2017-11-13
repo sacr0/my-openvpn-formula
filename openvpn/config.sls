@@ -90,21 +90,21 @@ openvpn_{{ type }}_{{ name }}_log_file:
 
 #{% if config.log_append is defined %}
 ## Ensure log file exists and is writeable
-#openvpn_{{ type }}_{{ name }}_log_file_append:
-#  file.managed:
-#    - name: {{ config.log_append }}
-#    - makedirs: True
-#    - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
-#    - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
-#    - watch_in:
-#      - service: openvpn_service
-#{% endif %}
+openvpn_{{ type }}_{{ name }}_log_file_append:
+  file.managed:
+    - name: {{ config.log_append }}
+    - makedirs: True
+    - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
+    - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
+    - watch_in:
+      - service: openvpn_service
+{% endif %}
 
 {% if config.client_config_dir is defined %}
 ## Ensure client config dir exists
 openvpn_config_{{ type }}_{{ name }}_client_config_dir:
   file.directory:
-    - name: {{ map.conf_dir }}/{{ config.client_config_dir}}
+    - name: {{ config.client_config_dir}}
     - makedirs: True
     - watch_in:
       - service: openvpn_service
@@ -113,7 +113,7 @@ openvpn_config_{{ type }}_{{ name }}_client_config_dir:
 # Client config for {{ client }}
 openvpn_config_{{ type }}_{{ name }}_{{ client }}_client_config:
   file.managed:
-    - name: {{ map.conf_dir }}/{{ config.client_config_dir}}/{{ client }}
+    - name: {{ config.client_config_dir}}/{{ client }}
     - contents_pillar: openvpn:{{ type }}:{{ name }}:client_config:{{ client }}
     - makedirs: True
     - watch_in:
