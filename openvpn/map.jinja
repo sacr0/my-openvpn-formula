@@ -47,4 +47,4 @@
         'user': 'nobody',
         'group': 'nobody',
     },
-}, grain='os', merge=salt['pillar.get']('openvpn:lookup')) %}
+}, grain='os_family', merge=salt['pillar.get']('openvpn:lookup')) %}

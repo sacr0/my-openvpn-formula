@@ -1,7 +1,7 @@
 {% from "openvpn/map.jinja" import map with context %}
 
 include:
-    - openvpn
+  - openvpn
 
 {% for type, names in salt['pillar.get']('openvpn', {}).iteritems() %}
 {% if type == 'server' or type == 'client' %}
