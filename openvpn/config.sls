@@ -18,7 +18,9 @@ openvpn_config_{{ type }}_{{ name }}:
         user: {{ map.user }}
         group: {{ map.group }}
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 
 {% if config.ca is defined and config.ca_content is defined %}
 # Deploy {{ type }} {{ name }} CA file
@@ -28,7 +30,9 @@ openvpn_config_{{ type }}_{{ name }}_ca_file:
     - contents_pillar: openvpn:{{ type }}:{{ name }}:ca_content
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 {% if config.cert is defined and config.cert_content is defined %}
@@ -39,7 +43,9 @@ openvpn_config_{{ type }}_{{ name }}_cert_file:
     - contents_pillar: openvpn:{{ type }}:{{ name }}:cert_content
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 {% if config.key is defined and config.key_content is defined %}
@@ -50,7 +56,9 @@ openvpn_config_{{ type }}_{{ name }}_key_file:
     - contents_pillar: openvpn:{{ type }}:{{ name }}:key_content
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 {% if config.tls_auth is defined and config.ta_content is defined %}
@@ -61,7 +69,9 @@ openvpn_config_{{ type }}_{{ name }}_tls_auth_file:
     - contents_pillar: openvpn:{{ type }}:{{ name }}:ta_content
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 #{% if config.status is defined %}
@@ -73,7 +83,9 @@ openvpn_config_{{ type }}_{{ name }}_tls_auth_file:
 #    - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
 #    - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
 #    - watch_in:
-#      - service: openvpn_service
+#{% for ovpn_service in map.service %}
+#      - service: {{ ovpn_service }}
+#{% endfor %}
 #{% endif %}
 
 {% if config.log is defined %}
@@ -85,7 +97,9 @@ openvpn_{{ type }}_{{ name }}_log_file:
     - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
     - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 #{% if config.log_append is defined %}
@@ -97,7 +111,9 @@ openvpn_{{ type }}_{{ name }}_log_file_append:
     - user: {% if config.user is defined %}{{ config.user }}{% else %}{{ map.user }}{% endif %}
     - group: {% if config.group is defined %}{{ config.group }}{% else %}{{ map.group }}{% endif %}
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endif %}
 
 {% if config.client_config_dir is defined %}
@@ -107,7 +123,9 @@ openvpn_config_{{ type }}_{{ name }}_client_config_dir:
     - name: {{ config.client_config_dir}}
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 
 {% for client, client_config in salt['pillar.get']('openvpn:'+type+':'+name+':client_config', {}).iteritems() %}
 # Client config for {{ client }}
@@ -117,7 +135,9 @@ openvpn_config_{{ type }}_{{ name }}_{{ client }}_client_config:
     - contents_pillar: openvpn:{{ type }}:{{ name }}:client_config:{{ client }}
     - makedirs: True
     - watch_in:
-      - service: openvpn_service
+{% for ovpn_service in map.service %}
+      - service: {{ ovpn_service }}
+{% endfor %}
 {% endfor %}
 {% endif %}
 
