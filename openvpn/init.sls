@@ -21,9 +21,9 @@ openvpn_create_dh_{{ dh }}:
 
 # Ensure openvpn service is running and autostart is enabled
 {% for ovpn_service in map.service %}
-openvpn_service:
+openvpn_service_{{ ovpn_service }}:
   service.running:
-    - name: {{ map.ovpn_service }}
+    - name: {{ ovpn_service }}
     - enable: True
     - require:
       - pkg: openvpn_pkgs
