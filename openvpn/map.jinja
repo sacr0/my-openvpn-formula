@@ -1,7 +1,7 @@
 {% set map = salt['grains.filter_by']({
     'Debian': {
         'pkgs': ['openvpn'],
-        'service': 'openvpn',
+        'service': ['openvpn'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
@@ -9,7 +9,7 @@
     },
     'Ubuntu': {
         'pkgs': ['openvpn'],
-        'service': 'openvpn',
+        'service': ['openvpn'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
@@ -17,7 +17,7 @@
     },
     'Amazon': {
         'pkgs': ['openvpn'],
-        'service': 'openvpn',
+        'service': ['openvpn'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
@@ -25,7 +25,7 @@
     },
     'RedHat': {
         'pkgs': ['openvpn'],
-        'service': 'openvpn@server',
+        'service': ['openvpn@server'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
@@ -33,7 +33,7 @@
     },
     'CentOS': {
         'pkgs': ['openvpn'],
-        'service': 'openvpn@server',
+        'service': ['openvpn@server'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
@@ -41,7 +41,7 @@
     },
     'Arch': {
         'pkgs': ['openvpn', 'easy-rsa'],
-        'service': 'openvpn-server@server',
+        'service': ['openvpn-server@server'],
         'conf_dir': '/etc/openvpn',
         'dh_files': ['2048'],
         'user': 'nobody',
